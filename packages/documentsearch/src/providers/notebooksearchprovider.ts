@@ -69,7 +69,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._searchTarget.hide();
 
     let indexTotal = 0;
-    const allMatches: ISearchMatch[] = [];
+    let allMatches: ISearchMatch[] = [];
     // For each cell, create a search provider and collect the matches
 
     for (const cell of cells) {
@@ -121,7 +121,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       // search has been initialized, connect the changed signal
       cmSearchProvider.changed.connect(this._onSearchProviderChanged, this);
 
-      allMatches.concat(matchesFromCell);
+      allMatches = allMatches.concat(matchesFromCell);
 
       this._searchProviders.push({
         cell: cell,
@@ -129,9 +129,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       });
 
       if (cell instanceof CodeCell && this._filters.output) {
-        const outputProivder = new GenericSearchProvider();
-        outputProivder.isSubProvider = true;
-        const matchesFromOutput = await outputProivder.startQuery(
+        const outputProvider = new GenericSearchProvider();
+        outputProvider.isSubProvider = true;
+        const matchesFromOutput = await outputProvider.startQuery(
           query,
           cell.outputArea
         );
@@ -140,13 +140,13 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
         });
         indexTotal += matchesFromOutput.length;
 
-        allMatches.concat(matchesFromOutput);
+        allMatches = allMatches.concat(matchesFromOutput);
 
-        outputProivder.changed.connect(this._onSearchProviderChanged, this);
+        outputProvider.changed.connect(this._onSearchProviderChanged, this);
 
         this._searchProviders.push({
           cell: cell,
-          provider: outputProivder
+          provider: outputProvider
         });
       }
     }
